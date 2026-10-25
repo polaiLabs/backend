@@ -1,16 +1,10 @@
 package store
 
 import (
-	"errors"
 	"sync"
 	"time"
 
 	"github.com/polai/backend/internal/models"
-)
-
-var (
-	ErrNotFound      = errors.New("record not found")
-	ErrAlreadyClosed = errors.New("market has already closed")
 )
 
 type MemoryStore struct {
@@ -40,8 +34,8 @@ func (s *MemoryStore) seedInitialMarkets() {
 		Description:    "Resolves to YES if public ledger stats report 50,000,000+ contract invocations before Dec 31.",
 		Category:       "Crypto",
 		Deadline:       now.Add(14 * 24 * time.Hour),
-		TotalYesAmount: 68000000000, // 6,800 XLM / stroops
-		TotalNoAmount:  32000000000, // 3,200 XLM / stroops
+		TotalYesAmount: 68000000000,
+		TotalNoAmount:  32000000000,
 		Outcome:        models.OutcomePending,
 		CreatedAt:      now.Add(-2 * 24 * time.Hour),
 	}
@@ -61,7 +55,7 @@ func (s *MemoryStore) seedInitialMarkets() {
 	s.nextID = 3
 }
 
-func (s *MemoryStore) ListMarkets(category string) []*models.Market {
+func (s *MemoryStore) ListMarkets(category string) ([]*models.Market, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -71,7 +65,7 @@ func (s *MemoryStore) ListMarkets(category string) []*models.Market {
 			res = append(res, m)
 		}
 	}
-	return res
+	return res, nil
 }
 
 func (s *MemoryStore) GetMarket(id uint64) (*models.Market, error) {
@@ -140,9 +134,9 @@ func (s *MemoryStore) RecordBet(req models.PlaceBetRequest) (*models.Bet, error)
 	return bet, nil
 }
 
-func (s *MemoryStore) GetUserBets(user string) []*models.Bet {
+func (s *MemoryStore) GetUserBets(user string) ([]*models.Bet, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	return s.bets[user]
+	return s.bets[user], nil
 }

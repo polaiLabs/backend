@@ -15,15 +15,32 @@ func main() {
 		port = "8080"
 	}
 
-	memStore := store.NewMemoryStore()
-	api := handlers.NewAPIHandler(memStore)
+	databaseURL := os.Getenv("DATABASE_URL")
+	tursoAuthToken := os.Getenv("TURSO_AUTH_TOKEN")
+
+	var appStore store.Store
+
+	if databaseURL != "" {
+		log.Printf("Connecting to Turso / libSQL SQLite database at: %s", databaseURL)
+		tStore, err := store.NewTursoStore(databaseURL, tursoAuthToken)
+		if err != nil {
+			log.Fatalf("Failed to initialize Turso database: %v", err)
+		}
+		appStore = tStore
+		log.Println("Turso SQLite store initialized and schema verified successfully.")
+	} else {
+		log.Println("No DATABASE_URL configured. Falling back to in-memory store.")
+		appStore = store.NewMemoryStore()
+	}
+
+	api := handlers.NewAPIHandler(appStore)
 
 	mux := http.NewServeMux()
 
 	// Health check
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"ok","service":"polai-backend"}`))
+		w.Write([]byte(`{"status":"ok","service":"polai-backend","db_driver":"libsql"}`))
 	})
 
 	// Market endpoints

@@ -11,16 +11,20 @@ import (
 )
 
 type APIHandler struct {
-	store *store.MemoryStore
+	store store.Store
 }
 
-func NewAPIHandler(s *store.MemoryStore) *APIHandler {
+func NewAPIHandler(s store.Store) *APIHandler {
 	return &APIHandler{store: s}
 }
 
 func (h *APIHandler) ListMarkets(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
-	markets := h.store.ListMarkets(category)
+	markets, err := h.store.ListMarkets(category)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
@@ -105,7 +109,12 @@ func (h *APIHandler) GetUserPositions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bets := h.store.GetUserBets(user)
+	bets, err := h.store.GetUserBets(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"data": bets,

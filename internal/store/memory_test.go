@@ -11,7 +11,10 @@ func TestMemoryStore_Lifecycle(t *testing.T) {
 	s := NewMemoryStore()
 
 	// Initial seeds
-	markets := s.ListMarkets("")
+	markets, err := s.ListMarkets("")
+	if err != nil {
+		t.Fatalf("failed to list markets: %v", err)
+	}
 	if len(markets) != 2 {
 		t.Fatalf("expected 2 seed markets, got %d", len(markets))
 	}
@@ -58,7 +61,10 @@ func TestMemoryStore_Lifecycle(t *testing.T) {
 	}
 
 	// Check user positions
-	userBets := s.GetUserBets("GUser1")
+	userBets, err := s.GetUserBets("GUser1")
+	if err != nil {
+		t.Fatalf("failed to get user bets: %v", err)
+	}
 	if len(userBets) != 1 {
 		t.Errorf("expected 1 bet for user, got %d", len(userBets))
 	}

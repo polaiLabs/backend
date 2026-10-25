@@ -1,0 +1,47 @@
+// Prisma schema for Polai Prediction Market
+// Configured for SQLite / Turso libSQL
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Market {
+  id             Int       @id @default(autoincrement())
+  creator        String
+  resolver       String
+  title          String
+  description    String
+  category       String
+  deadline       DateTime
+  totalYesAmount BigInt    @default(0)
+  totalNoAmount  BigInt    @default(0)
+  outcome        String    @default("PENDING") // PENDING, YES, NO, INVALID
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  bets           Bet[]
+
+  @@map("markets")
+}
+
+model Bet {
+  id        String   @id // Transaction hash
+  marketId  Int      @map("market_id")
+  user      String
+  outcome   String   // YES, NO
+  amount    BigInt
+  txHash    String   @map("tx_hash")
+  claimed   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  market    Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@index([user])
+  @@index([marketId])
+  @@map("bets")
+}
