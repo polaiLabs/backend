@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: polai-backend
+    runtime: go
+    plan: free
+    region: oregon
+    buildCommand: go build -o server ./cmd/server
+    startCommand: ./server
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
