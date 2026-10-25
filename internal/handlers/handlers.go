@@ -137,10 +137,10 @@ func WithCORS(next http.Handler) http.Handler {
 			for _, allowed := range allowedList {
 				trimmed := strings.TrimSpace(allowed)
 				// Match exact, or with/without protocol scheme
-				if trimmed == origin || 
-				   "https://" + trimmed == origin || 
-				   "http://" + trimmed == origin ||
-				   trimmed == "*" {
+				if trimmed == origin ||
+					"https://"+trimmed == origin ||
+					"http://"+trimmed == origin ||
+					trimmed == "*" {
 					allowOrigin = origin
 					break
 				}
