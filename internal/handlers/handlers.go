@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -122,10 +123,38 @@ func (h *APIHandler) GetUserPositions(w http.ResponseWriter, r *http.Request) {
 }
 
 func WithCORS(next http.Handler) http.Handler {
+	allowedOriginsEnv := os.Getenv("ALLOWED_ORIGINS")
+	if allowedOriginsEnv == "" {
+		allowedOriginsEnv = "*"
+	}
+	allowedList := strings.Split(allowedOriginsEnv, ",")
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := r.Header.Get("Origin")
+		allowOrigin := "*"
+
+		if allowedOriginsEnv != "*" && origin != "" {
+			for _, allowed := range allowedList {
+				trimmed := strings.TrimSpace(allowed)
+				// Match exact, or with/without protocol scheme
+				if trimmed == origin || 
+				   "https://" + trimmed == origin || 
+				   "http://" + trimmed == origin ||
+				   trimmed == "*" {
+					allowOrigin = origin
+					break
+				}
+			}
+		} else if allowedOriginsEnv != "*" {
+			// Fallback to first configured origin if no origin header
+			allowOrigin = strings.TrimSpace(allowedList[0])
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", allowOrigin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return
