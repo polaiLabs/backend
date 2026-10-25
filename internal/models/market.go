@@ -12,18 +12,18 @@ const (
 )
 
 type Market struct {
-	ID             uint64    `json:"id"`
-	Creator        string    `json:"creator"`
-	Resolver       string    `json:"resolver"`
-	Title          string    `json:"title"`
-	Description    string    `json:"description"`
-	Category       string    `json:"category"`
-	Deadline       time.Time `json:"deadline"`
-	TotalYesAmount int64     `json:"total_yes_amount"`
-	TotalNoAmount  int64     `json:"total_no_amount"`
-	Outcome        Outcome   `json:"outcome"`
-	ResolvedAt     *time.Time`json:"resolved_at,omitempty"`
-	CreatedAt      time.Time `json:"created_at"`
+	ID             uint64     `json:"id"`
+	Creator        string     `json:"creator"`
+	Resolver       string     `json:"resolver"`
+	Title          string     `json:"title"`
+	Description    string     `json:"description"`
+	Category       string     `json:"category"`
+	Deadline       time.Time  `json:"deadline"`
+	TotalYesAmount int64      `json:"total_yes_amount"`
+	TotalNoAmount  int64      `json:"total_no_amount"`
+	Outcome        Outcome    `json:"outcome"`
+	ResolvedAt     *time.Time `json:"resolved_at,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
 }
 
 type Bet struct {

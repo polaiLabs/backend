@@ -7,12 +7,21 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23'
-      - name: Run Tests
-        run: go test -v ./...
+
+      - name: Format Check
+        run: |
+          diff -u <(echo -n) <(gofmt -d .)
+
+      - name: Lint & Static Analysis (go vet)
+        run: go vet ./...
+
+      - name: Unit & Integration Tests
+        run: go test -v -race ./...
